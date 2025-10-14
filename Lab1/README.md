@@ -1,4 +1,4 @@
-# Lab 1 – Cozy HTTP Bookshelf
+# Lab 1 – HTTP file server with TCP sockets
 
 A tiny HTTP/1.1 file server and matching client for sharing a curated shelf of PDFs, PNG art, and HTML. The goal is to mimic the behavior of Python's built-in `http.server` while keeping the implementation approachable and well-documented.
 
@@ -400,14 +400,9 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    ```
   *Explanation:* Confirms nested folders inherit the same templated listing experience.
 
-9. **Browsing a friend's server (bonus)**  
-   Not completed yet. Include IP discovery notes, screenshots, and client output here if you perform the optional network exchange.
+
 
 
 ---
 
-## Next steps
 
-- Add MIME types beyond HTML, PNG, and PDF.
-- Serve byte ranges to support resumed downloads.
-- Explore TLS termination with a reverse proxy for secure sharing.
