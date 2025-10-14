@@ -1,0 +1,17 @@
+services:
+  server:
+    build: .
+    container_name: cozy-bookshelf
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./content:/app/content
+      - ./downloads:/downloads
+    command: ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
+  client:
+    build: .
+    entrypoint: ["python", "client.py"]
+    profiles: ["client"]
+    volumes:
+      - ./downloads:/downloads
+    working_dir: /app

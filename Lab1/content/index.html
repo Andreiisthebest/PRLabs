@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>My PDF Library</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f9fc; color: #1f2933; margin: 0; padding: 0; }
+    header { background: linear-gradient(120deg, #6366f1, #8b5cf6); color: white; padding: 2rem 1rem; text-align: center; }
+    main { padding: 2rem 10vw; }
+    h1 { margin-bottom: 0.5rem; }
+    p.description { max-width: 640px; margin: 0 auto 2rem; line-height: 1.6; }
+    .showcase { display: flex; flex-direction: column; gap: 2rem; align-items: center; }
+    img.bookshelf { max-width: 380px; border-radius: 12px; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25); }
+    .links { display: grid; gap: 0.75rem; max-width: 360px; width: 100%; }
+    .links a { display: block; padding: 0.85rem 1.1rem; border-radius: 10px; background: white; color: #3730a3; font-weight: 600; text-decoration: none; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 8px 16px rgba(79, 70, 229, 0.15); }
+    .links a:hover { transform: translateY(-2px); box-shadow: 0 12px 22px rgba(79, 70, 229, 0.3); }
+    footer { margin-top: 4rem; text-align: center; font-size: 0.9rem; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Andrew's Cozy PDF Library</h1>
+    <p class="description">Browse lecture notes, art books, and hand-picked zines. Everything is neatly organized, and you can even grab a copy using the tiny client script.</p>
+  </header>
+  <main>
+    <div class="showcase">
+      <img class="bookshelf" src="assets/bookshelf.png" alt="A stylized bookshelf illustration" />
+      <div class="links">
+        <a href="books/intro-to-networking.pdf">Intro to Networking (PDF)</a>
+        <a href="books/latency-patterns.pdf">Latency Patterns (PDF)</a>
+  <a href="books/illustrated/retro-computing.pdf" download>Retro Computing Sketchbook (PDF)</a>
+        <a href="books/">Explore the full directory &rarr;</a>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>Hosted with a hand-rolled HTTP server. Enjoy the shelves!</p>
+  </footer>
+</body>
+</html>
