@@ -1,6 +1,7 @@
 import argparse
 import socket
 import sys
+import time
 from pathlib import Path
 from typing import Dict, Tuple
 import urllib.parse
@@ -37,6 +38,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=8080,
         help="TCP port to listen on (default: 8080)",
+    )
+    parser.add_argument(
+        "--simulate-delay",
+        type=float,
+        default=0.0,
+        help="Optional per-request delay in seconds to simulate slow handlers",
     )
     return parser.parse_args()
 
@@ -188,7 +195,12 @@ def handle_get(root: Path, target: str) -> bytes:
         headers["Content-Disposition"] = f'attachment; filename="{filesystem_path.name}"'
     return build_response("HTTP/1.1 200 OK", headers, body)
 
-def handle_client(connection: socket.socket, address: Tuple[str, int], root: Path) -> None:
+def handle_client(
+    connection: socket.socket,
+    address: Tuple[str, int],
+    root: Path,
+    simulate_delay: float,
+) -> None:
     request_bytes = read_http_request(connection)
     if not request_bytes:
         return
@@ -226,10 +238,13 @@ def handle_client(connection: socket.socket, address: Tuple[str, int], root: Pat
         connection.sendall(response)
         return
 
+    if simulate_delay > 0:
+        time.sleep(simulate_delay)  # Simulate expensive work for lab comparisons
+
     response = handle_get(root, target)
     connection.sendall(response)
 
-def run_server(directory: Path, host: str, port: int) -> None:
+def run_server(directory: Path, host: str, port: int, simulate_delay: float) -> None:
     root = directory.resolve()
     if not root.exists() or not root.is_dir():
         raise ValueError(f"Provided directory '{root}' is not a valid folder")
@@ -247,13 +262,13 @@ def run_server(directory: Path, host: str, port: int) -> None:
                 print("\nShutting down server...")
                 break
             with client_conn:
-                handle_client(client_conn, client_addr, root)
+                handle_client(client_conn, client_addr, root, simulate_delay)
 
 
 def main() -> None:
     args = parse_args()
     try:
-        run_server(args.directory, args.host, args.port)
+        run_server(args.directory, args.host, args.port, args.simulate_delay)
     except ValueError as exc:
         print(exc)
         sys.exit(1)
