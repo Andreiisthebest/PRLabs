@@ -139,11 +139,3 @@ These screenshots, alongside the request-counter captures, form the quantitative
 
 Lab 2 evolves the simple Lab 1 server into a resilient concurrent service. A thread pool lifts the sequential bottleneck, the synchronized counter eliminates race conditions, and the optional naïve mode exposes the original bug for documentation. The load tester and Docker assets turn the experiments into repeatable workflows. Finally, the rate limiter ensures fairness under bursty traffic—showing how concurrency plus careful regulation can deliver both responsiveness and protection. With the gathered evidence embedded in `docs/report/`, the lab meets all functional and reporting objectives.
 
-## Evidence Checklist
-
-Capture the following artefacts in `docs/report/` (screenshot, log, or table as appropriate) and reference them in your formal submission:
-
-- Directory listing that shows per-resource request counters before/after the race fix.
-- Load test results comparing Lab 1 vs. Lab 2 latency under an artificial delay.
-- Rate limiting traces demonstrating HTTP 429 responses once the threshold is exceeded.
-- Step-by-step commands used to reproduce each experiment (include PowerShell history or snippets).
