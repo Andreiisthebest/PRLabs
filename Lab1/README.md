@@ -261,17 +261,7 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    ```
    *Explanation:* This command starts the HTTP server inside the container, serving files from the `content` directory on all network interfaces at port 8080.
 
-   The Compose service launches the same command:
-   ```yaml
-   command: ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
-   ```
-   *Explanation:* Mirrors the image's default entrypoint so Compose runs match standalone containers.
 
-   The Dockerfile CMD:
-   ```dockerfile
-   CMD ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
-   ```
-   *Explanation:* Aligns standalone container executions with the same parameters used by Compose.
 
 ![alt text](<docs/report/Screenshot 2025-10-25 101710.png>)
 
@@ -366,7 +356,7 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
        body { font-family: Arial, sans-serif; margin: 2rem; }
        ...
    ```
-   *Explanation:* Proves the custom directory listing renders friendly HTML when browsing folders.
+   *Explanation:* Proves the custom directory listing renders  HTML when browsing folders.
 
    **Subdirectory listing (/books/illustrated/):**
    
