@@ -71,12 +71,12 @@ docker compose down
 #### Use the client container  You can run the bundled client image against the server container without installing Python locally. The following command fetches a PDF from the server service and saves it in `downloads/` on the host:
 
   ```powershell
-  docker compose run --rm client server 8080 /books/latency-patterns.pdf /downloads
+  docker compose run --rm client server 8080 /books/CryptoLab.pdf /downloads
   ```
 
   *Explanation:* Runs the client inside Docker to pull the PDF into the shared `downloads/` folder, then exits.
 
-  Replace `/books/latency-patterns.pdf` with any path the server exposes. The hostname `server` refers to the server service on the Compose network; point it at a friend's machine by swapping in their IP/hostname instead.
+  
 
 ### Features
 
@@ -111,7 +111,7 @@ Examples:
 - Download a PDF into your local `content/books` folder:
 
   ```powershell
-  python client.py localhost 8080 /books/latency-patterns.pdf content/books
+  python client.py localhost 8080 /books/CryptoLab.pdf
   ```
 
   *Explanation:* Downloads the PDF and saves it into your local `content/books` directory for offline reading.
@@ -119,7 +119,7 @@ Examples:
 - Save the illustrated gallery PNG to the nested directory (directories are created automatically):
 
   ```powershell
-  python client.py localhost 8080 /books/illustrated/micro-gallery.png content/books/illustrated
+  python client.py localhost 8080 /books/illustrated/micro-gallery.png 
   ```
 
   *Explanation:* Pulls the PNG asset into the illustrated subfolder so the local tree matches the server’s layout.
@@ -255,16 +255,25 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
 
 4. **Server command inside the container**  
    
-   The Compose service launches the same command baked into the image:
+   The command that runs the server inside the container with a directory as an argument:
+   ```bash
+   python server.py content --host 0.0.0.0 --port 8080
+   ```
+   *Explanation:* This command starts the HTTP server inside the container, serving files from the `content` directory on all network interfaces at port 8080.
+
+   The Compose service launches the same command:
    ```yaml
    command: ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
    ```
    *Explanation:* Mirrors the image's default entrypoint so Compose runs match standalone containers.
 
+   The Dockerfile CMD:
    ```dockerfile
    CMD ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
    ```
    *Explanation:* Aligns standalone container executions with the same parameters used by Compose.
+
+![alt text](<docs/report/Screenshot 2025-10-25 101710.png>)
 
 5. **Contents of the served directory**  
    ```text
@@ -294,15 +303,15 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    ```text
    404 Not Found
    ```
-   *Screenshot placeholder: Browser showing "404 Not Found" message*
+![alt text](<docs/report/Screenshot 2025-10-25 093513.png>)
 
    **HTML file with image:**
    
-   Visit in browser: `http://localhost:8080/`
+   Visit in browser: `http://localhost:8080/index.html`
    
-   *Explanation:* Displays the homepage with the bookshelf image and links to all available PDFs.
    
-   *Screenshot placeholder: Browser showing the "My PDF Library" homepage with bookshelf image and file listings*
+   
+![alt text](<docs/report/Screenshot 2025-10-25 102002.png>)
 
    **PDF file:**
    
@@ -310,28 +319,30 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    
    *Explanation:* Opens the PDF file directly in the browser or triggers a download.
    
-   *Screenshot placeholder: Browser showing the PDF file or download prompt*
+   ![alt text](<docs/report/Screenshot 2025-10-25 102205.png>)
 
    **PNG file:**
    
-   Visit in browser: `http://localhost:8080/books/illustrated/micro-gallery.png`
+   Visit in browser: `http://localhost:8080/assets/il_fullxfull.3860244894_p9az.png`
    
    *Explanation:* Displays the PNG image directly in the browser.
    
-   *Screenshot placeholder: Browser showing the PNG image*
+  ![alt text](<docs/report/Screenshot 2025-10-25 102348.png>)
 
 7. **Client usage**  
    
    **Running the client:**
    ```powershell
-   python client.py localhost 8080 "/books/AA%20Tournament%20requirements%20part%202.pdf" downloads
+   python client.py localhost 8080 "/books/CryptoLab.pdf" downloads
    ```
    *Explanation:* Exercises the client script against the local server and saves the PDF into the `downloads` folder.
 
    **Console output:**
-   ```text
-   Saved AA Tournament requirements part 2.pdf (258639 bytes) to downloads
-   ```
+
+![alt text](<docs/report/Screenshot 2025-10-25 103623.png>)
+
+
+
    *Explanation:* Confirms the client received the file and persisted it with the expected byte count.
 
 
