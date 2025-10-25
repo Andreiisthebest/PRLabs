@@ -32,8 +32,7 @@ This tree highlights the main Python entry points alongside the static content a
 
 ## Running the server
 
-1. Activate the repo's virtual environment.
-2. Start the server by pointing it at the directory you want to publish:
+1. Start the server by pointing it at the directory you want to publish:
 
    ```powershell
    python server.py content --port 8080
@@ -44,7 +43,7 @@ This tree highlights the main Python entry points alongside the static content a
    * `--host` defaults to `0.0.0.0` so the server is reachable from your LAN.
    * `--port` defaults to `8080`. Override it if the port is occupied.
 
-3. Visit `http://localhost:8080/` (or swap in your machine's LAN IP) to browse.
+2. Visit `http://localhost:8080/` (or swap in your machine's LAN IP) to browse.
 
 ### Run the stack with Docker Compose
 
@@ -149,19 +148,6 @@ The file is downloaded and ready to serve from your own instance—refresh your 
 
 ---
 
-## Regenerating demo assets
-
-The placeholder artwork and PDFs were generated with pure-Python code so that everything stays self-contained. Rerun the helper whenever you want fresh copies:
-
-```powershell
-python scripts/generate_assets.py
-```
-
-*Explanation:* Recreates all placeholder PDFs and PNGs so the repository stays self-contained.
-
-Feel free to swap in your own artwork or lecture notes; the server will automatically pick them up.
-
----
 
 ## Lab report evidence checklist
 
@@ -246,12 +232,6 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    ```
    *Explanation:* Builds the image if needed and starts the bookshelf server inside Docker for local testing.
 
-   Expected log tail once the server is ready:
-   ```text
-   cozy-bookshelf  | Serving '/app/content' on http://0.0.0.0:8080
-   cozy-bookshelf  | 127.0.0.1 - - [14/Oct/2025 19:05:12] "GET / HTTP/1.1" 200 -
-   ```
-   *Explanation:* Confirms the container booted, logged the GET request, and is serving traffic.
 
 4. **Server command inside the container**  
    
