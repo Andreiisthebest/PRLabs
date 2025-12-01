@@ -1,0 +1,38 @@
+{
+  "include": [
+    "./src/**/*.ts",
+    "./test/**/*.ts",
+    "./test/**/*.d.ts"
+  ],
+  
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    
+    "target": "esnext",
+    "module": "nodenext",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "types": [
+      "node",
+      "mocha"
+    ]
+  },
+  
+  "typedocOptions": {
+    "entryPoints": [
+      "src/board.ts",
+      "src/commands.ts"
+    ],
+    "out": "doc",
+    "disableSources": true,
+    "excludePrivate": true,
+    "readme": "none"
+  },
+}

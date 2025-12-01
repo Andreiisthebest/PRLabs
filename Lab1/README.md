@@ -32,53 +32,50 @@ This tree highlights the main Python entry points alongside the static content a
 
 ## Running the server
 
-1. Activate the repo's virtual environment.
-2. Start the server by pointing it at the directory you want to publish:
+1. Start the server by pointing it at the directory you want to publish:
 
    ```powershell
    python server.py content --port 8080
    ```
 
-  *Explanation:* Runs the HTTP server against the `content` directory while listening on port 8080.
+   *Explanation:* Runs the HTTP server against the `content` directory while listening on port 8080.
 
    * `--host` defaults to `0.0.0.0` so the server is reachable from your LAN.
    * `--port` defaults to `8080`. Override it if the port is occupied.
 
-3. Visit `http://localhost:8080/` (or swap in your machine's LAN IP) to browse.
+2. Visit `http://localhost:8080/` (or swap in your machine's LAN IP) to browse.
 
-  ### Run the stack with Docker Compose
+### Run the stack with Docker Compose
 
-  Prefer containers? The included `docker-compose.yml` spins up both the server and an optional client image. Build the images and launch the server service:
+Prefer containers? The included `docker-compose.yml` spins up both the server and an optional client image. Build the images and launch the server service:
 
-  ```powershell
-  docker compose up --build server
-  ```
+```powershell
+docker compose up --build server
+```
 
-  *Explanation:* Builds the image if needed and starts the `server` service for containerized testing.
+*Explanation:* Builds the image if needed and starts the `server` service for containerized testing.
 
-  * The server listens on port `8080` by default; override it with `-p 9090:8080` if needed.
-  * Static content lives in the bind-mounted `content/` folder, so editing files on the host updates the container instantly.
-  * Downloads produced by the client land in the shared `downloads/` directory.
+* The server listens on port `8080` by default; override it with `-p 9090:8080` if needed.
+* Static content lives in the bind-mounted `content/` folder, so editing files on the host updates the container instantly.
+* Downloads produced by the client land in the shared `downloads/` directory.
 
-  When you're done, stop the stack:
+When you're done, stop the stack:
 
-  ```powershell
-  docker compose down
-  ```
+```powershell
+docker compose down
+```
 
-  *Explanation:* Stops the running stack and removes the Compose-managed network.
+*Explanation:* Stops the running stack and removes the Compose-managed network.
 
-  #### Use the client container
-
-  You can run the bundled client image against the server container without installing Python locally. The following command fetches a PDF from the server service and saves it in `downloads/` on the host:
+#### Use the client container  You can run the bundled client image against the server container without installing Python locally. The following command fetches a PDF from the server service and saves it in `downloads/` on the host:
 
   ```powershell
-  docker compose run --rm client server 8080 /books/latency-patterns.pdf /downloads
+  docker compose run --rm client server 8080 /books/CryptoLab.pdf /downloads
   ```
 
   *Explanation:* Runs the client inside Docker to pull the PDF into the shared `downloads/` folder, then exits.
 
-  Replace `/books/latency-patterns.pdf` with any path the server exposes. The hostname `server` refers to the server service on the Compose network; point it at a friend's machine by swapping in their IP/hostname instead.
+  
 
 ### Features
 
@@ -113,7 +110,7 @@ Examples:
 - Download a PDF into your local `content/books` folder:
 
   ```powershell
-  python client.py localhost 8080 /books/latency-patterns.pdf content/books
+  python client.py localhost 8080 /books/CryptoLab.pdf
   ```
 
   *Explanation:* Downloads the PDF and saves it into your local `content/books` directory for offline reading.
@@ -121,7 +118,7 @@ Examples:
 - Save the illustrated gallery PNG to the nested directory (directories are created automatically):
 
   ```powershell
-  python client.py localhost 8080 /books/illustrated/micro-gallery.png content/books/illustrated
+  python client.py localhost 8080 /books/illustrated/micro-gallery.png 
   ```
 
   *Explanation:* Pulls the PNG asset into the illustrated subfolder so the local tree matches the server’s layout.
@@ -151,19 +148,6 @@ The file is downloaded and ready to serve from your own instance—refresh your 
 
 ---
 
-## Regenerating demo assets
-
-The placeholder artwork and PDFs were generated with pure-Python code so that everything stays self-contained. Rerun the helper whenever you want fresh copies:
-
-```powershell
-python scripts/generate_assets.py
-```
-
-*Explanation:* Recreates all placeholder PDFs and PNGs so the repository stays self-contained.
-
-Feel free to swap in your own artwork or lecture notes; the server will automatically pick them up.
-
----
 
 ## Lab report evidence checklist
 
@@ -190,16 +174,17 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    ├── docker-compose.yml
    ├── docs/
    │   └── report/
-  │       └── README.md
-  ├── downloads/
+   │       └── README.md
+   ├── downloads/
    ├── scripts/
    │   └── generate_assets.py
    └── server.py
    ```
-  *Explanation:* Captures every deliverable bundled with the lab, from code to content and documentation.
+   *Explanation:* Captures every deliverable bundled with the lab, from code to content and documentation.
 
 2. **Container assets**  
-   `Dockerfile`
+   
+   **Dockerfile**
    ```dockerfile
    # syntax=docker/dockerfile:1.6
    FROM python:3.13-slim AS runtime
@@ -217,9 +202,9 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
 
    CMD ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
    ```
-  *Explanation:* Installs Python 3.13, copies the app files, and sets the default command to run the server from `content`.
+   *Explanation:* Installs Python 3.13, copies the app files, and sets the default command to run the server from `content`.
 
-   `docker-compose.yml`
+   **docker-compose.yml**
    ```yaml
    services:
      server:
@@ -239,39 +224,33 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
          - ./downloads:/downloads
        working_dir: /app
    ```
-  *Explanation:* Defines both services and mounts so containerized runs stay in sync with the host filesystem.
+   *Explanation:* Defines both services and mounts so containerized runs stay in sync with the host filesystem.
 
 3. **Starting the container stack**  
    ```powershell
-   docker compose -f Lab1/docker-compose.yml up --build server
+   docker compose up --build 
    ```
-  *Explanation:* Builds the image if needed and starts the bookshelf server inside Docker for local testing.
+   *Explanation:* Builds the image if needed and starts the bookshelf server inside Docker for local testing.
 
-   Expected log tail once the server is ready:
-   ```text
-   cozy-bookshelf  | Serving '/app/content' on http://0.0.0.0:8080
-   cozy-bookshelf  | 127.0.0.1 - - [14/Oct/2025 19:05:12] "GET / HTTP/1.1" 200 -
-   ```
-  *Explanation:* Confirms the container booted, logged the GET request, and is serving traffic.
 
 4. **Server command inside the container**  
-   The Compose service launches the same command baked into the image:
-   ```yaml
-   command: ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
+   
+   The command that runs the server inside the container with a directory as an argument:
+   ```bash
+   python server.py content --host 0.0.0.0 --port 8080
    ```
-  *Explanation:* Mirrors the image’s default entrypoint so Compose runs match standalone containers.
+   *Explanation:* This command starts the HTTP server inside the container, serving files from the `content` directory on all network interfaces at port 8080.
 
-   ```dockerfile
-   CMD ["python", "server.py", "content", "--host", "0.0.0.0", "--port", "8080"]
-   ```
-  *Explanation:* Aligns standalone container executions with the same parameters used by Compose.
+
+
+![alt text](<docs/report/Screenshot 2025-10-25 101710.png>)
 
 5. **Contents of the served directory**  
    ```text
    content/
    ├── assets/
-  │   └── bookshelf.png
-  ├── books/
+   │   └── bookshelf.png
+   ├── books/
    │   ├── AA Tournament requirements part 2.pdf
    │   ├── CryptoLab.pdf
    │   ├── Lab2_Crypto.pdf
@@ -280,96 +259,69 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
    │       └── micro-gallery.png
    └── index.html
    ```
-  *Explanation:* Confirms the server exposes an HTML landing page, four PDFs, and a nested illustrated PNG resource.
+   *Explanation:* Confirms the server exposes an HTML landing page, four PDFs, and a nested illustrated PNG resource.
 
 6. **Browser requests (four cases)**  
-   ```powershell
-   curl -i http://localhost:8080/missing.pdf
-   ```
-  *Explanation:* Intentionally requests a missing resource to demonstrate the server's 404 handling.
-   ```http
-   HTTP/1.1 404 Not Found
-   Content-Type: text/plain; charset=utf-8
-   Content-Length: 13
-   Connection: close
-
+   
+   **Inexistent file (404 Not Found):**
+   
+   Visit in browser: `http://localhost:8080/missing.pdf`
+   
+   *Explanation:* Intentionally requests a missing resource to demonstrate the server's 404 handling.
+   
+   Expected response:
+   ```text
    404 Not Found
    ```
-  *Explanation:* Shows the server returns the correct 404 headers and body for missing files.
+![alt text](<docs/report/Screenshot 2025-10-25 093513.png>)
 
-   ```powershell
-   curl -i http://localhost:8080/
-   ```
-  *Explanation:* Fetches the homepage so you can capture the HTML response and embedded image reference.
-   ```http
-   HTTP/1.1 200 OK
-   Content-Type: text/html; charset=utf-8
-   Content-Length: 2125
-   Connection: close
+   **HTML file with image:**
+   
+   Visit in browser: `http://localhost:8080/index.html`
+   
+   
+   
+![alt text](<docs/report/Screenshot 2025-10-25 102002.png>)
 
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-     <meta charset="utf-8" />
-     <title>My PDF Library</title>
-     <style>
-       body { font-family: Arial, sans-serif; background: #f6f9fc; color: #1f2933; margin: 0; padding: 0; }
-       ...
-   ```
-  *Explanation:* Highlights the 200 status plus the HTML markup browsers render as the landing page.
+   **PDF file:**
+   
+   Visit in browser: `http://localhost:8080/books/CryptoLab.pdf`
+   
+   *Explanation:* Opens the PDF file directly in the browser or triggers a download.
+   
+   ![alt text](<docs/report/Screenshot 2025-10-25 102205.png>)
 
-   ```powershell
-   curl -I "http://localhost:8080/books/AA%20Tournament%20requirements%20part%202.pdf"
-   ```
-  *Explanation:* Demonstrates that PDF assets are served with the correct MIME type and size.
-   ```http
-   HTTP/1.1 200 OK
-   Content-Type: application/pdf
-   Content-Length: 258639
-   Connection: close
-   ```
-  *Explanation:* Verifies the server reports both the PDF length and the `application/pdf` content type.
-
-   ```powershell
-   curl -I http://localhost:8080/books/illustrated/micro-gallery.png
-   ```
-  *Explanation:* Confirms the PNG is exposed correctly with its MIME type and length.
-   ```http
-   HTTP/1.1 200 OK
-   Content-Type: image/png
-   Content-Length: 755
-   Connection: close
-   ```
-  *Explanation:* Shows the server returning the correct byte length and `image/png` header for the image.
+   **PNG file:**
+   
+   Visit in browser: `http://localhost:8080/assets/il_fullxfull.3860244894_p9az.png`
+   
+   *Explanation:* Displays the PNG image directly in the browser.
+   
+  ![alt text](<docs/report/Screenshot 2025-10-25 102348.png>)
 
 7. **Client usage**  
+   
+   **Running the client:**
    ```powershell
-   python client.py localhost 8080 \
-       "/books/AA%20Tournament%20requirements%20part%202.pdf" downloads
+   python client.py localhost 8080 "/books/CryptoLab.pdf" downloads
    ```
-  *Explanation:* Exercises the client script against the local server and saves the PDF into the `downloads` folder.
+   *Explanation:* Exercises the client script against the local server and saves the PDF into the `downloads` folder.
 
-   Console output:
-   ```text
-   Saved AA Tournament requirements part 2.pdf (258639 bytes) to downloads
-   ```
-  *Explanation:* Confirms the client received the file and persisted it with the expected byte count.
+   **Console output:**
 
-   Verify the saved artifact:
-   ```powershell
-   Get-ChildItem downloads
-   ```
-  *Explanation:* Proves the downloaded file landed on disk where it can be inspected.
-   ```text
-       Directory: C:\path\to\repo\Lab1\downloads
+![alt text](<docs/report/Screenshot 2025-10-25 103623.png>)
 
-   Mode                 LastWriteTime         Length Name
-   ----                 -------------         ------ ----
-   -a---         2025-10-14  19:07:18        258639 AA Tournament requirements part 2.pdf
-   ```
-  *Explanation:* Shows the retrieved PDF alongside its size and timestamp for grading evidence.
+
+
+   *Explanation:* Confirms the client received the file and persisted it with the expected byte count.
+
+
+   *Explanation:* Shows the retrieved PDF alongside its size and timestamp for grading evidence.
 
 8. **Directory listing page**  
+   
+   **Main directory listing (/books/):**
+   
    Requesting `/books/` produces HTML generated by `server.py`:
    ```http
    HTTP/1.1 200 OK
@@ -384,8 +336,10 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
        body { font-family: Arial, sans-serif; margin: 2rem; }
        ...
    ```
-  *Explanation:* Proves the custom directory listing renders friendly HTML when browsing folders.
+   *Explanation:* Proves the custom directory listing renders  HTML when browsing folders.
 
+   **Subdirectory listing (/books/illustrated/):**
+   
    Subdirectory `/books/illustrated/`:
    ```http
    HTTP/1.1 200 OK
@@ -398,11 +352,5 @@ Use the following artifacts to demonstrate each requirement. Swap or trim sectio
      <title>Index of /books/illustrated/</title>
      ...
    ```
-  *Explanation:* Confirms nested folders inherit the same templated listing experience.
-
-
-
-
----
-
+   *Explanation:* Confirms nested folders inherit the same templated listing experience.
 
