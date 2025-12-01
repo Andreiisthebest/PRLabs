@@ -498,41 +498,7 @@ This is normal with quorum < 5. Followers will eventually catch up.
         
         print(f"\nOverall: {consistent_count}/{total_tests} tests had full consistency")
         
-        # Explain the results
-        print("\n" + "-" * 60)
-        print("EXPLANATION OF RESULTS:")
-        print("-" * 60)
-        print("""
-Semi-synchronous replication means the leader waits for WRITE_QUORUM
-followers to confirm before returning success to the client. However,
-this does NOT mean all followers have the data immediately.
-
-Expected behavior:
-  - With quorum=1: Leader waits for 1 follower only
-    → Other 4 followers may still be replicating
-    → Possible temporary inconsistency right after writes
-  
-  - With quorum=3: Leader waits for 3 followers
-    → At least 3 followers have confirmed
-    → Remaining 2 may still be catching up
-  
-  - With quorum=5: Leader waits for ALL followers
-    → All followers confirmed before success returned
-    → Should be fully consistent immediately
-
-After waiting 5 seconds for replication to complete, all followers
-should eventually reach consistency due to:
-  1. Async replication continues even after client gets response
-  2. Versioning system prevents out-of-order updates
-  3. All writes eventually propagate to all followers
-
-If inconsistencies persist after the wait period, this may indicate:
-  - Network issues preventing replication
-  - Followers being restarted or down
-  - Higher write rate than replication can handle
-""")
-        
-        print("=" * 60)
+        print("\n" + "=" * 60)
         print("ANALYSIS COMPLETE!")
         print("=" * 60)
         print(f"Generated files:")
