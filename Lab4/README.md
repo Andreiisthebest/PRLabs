@@ -393,10 +393,10 @@ TEST SUMMARY
 
 ### Consistency Verification
 
-Checks all replicas have matching data:
+Check if all replicas have matching data (no writes):
 
 ```powershell
-python verify_consistency.py
+python auto_analyze.py --verify
 ```
 
 **What it does:**
@@ -407,29 +407,41 @@ python verify_consistency.py
 
 **Expected output:**
 ```
-Checking consistency across 6 nodes...
+======================================================================
+CONSISTENCY VERIFICATION ONLY
+======================================================================
 
-Comparing follower1:8001 with leader...
-  ✓ All keys match
-  ✓ All values match
-  ✓ All versions match
-
-[... same for other followers ...]
-
-✓ All followers are consistent with leader!
+Leader has 100 keys
+✓ Follower :8001 - Consistent (100 keys)
+✓ Follower :8002 - Consistent (100 keys)
+...
+✓ ALL REPLICAS ARE CONSISTENT WITH LEADER
 ```
 
 ## Performance Analysis
 
 ### Running the Analysis
 
+**Full Analysis (All Quorums 1-5):**
 ```powershell
 python auto_analyze.py
 ```
 
-**What it does:**
+**Quick Test (Current Quorum Only):**
+```powershell
+python auto_analyze.py --simple
+```
+
+**Consistency Check Only (No Writes):**
+```powershell
+python auto_analyze.py --verify
+```
+
+**What it does (full analysis):**
 - Tests quorum values from 1 to 5 automatically
 - For each quorum: restarts leader, runs 200 concurrent writes
+- **Waits 5 seconds for replication to complete**
+- **Verifies all replicas have consistent data with the leader**
 - Measures latency statistics (avg, median, stdev)
 - Generates visualization with linear trend lines
 - Saves raw data to `quorum_results.json`
@@ -456,31 +468,119 @@ Running 200 concurrent writes...
   Median latency: 0.269s
   Std dev: 0.209s
 
+Waiting for replication to complete...
+
+------------------------------------------------------------
+CONSISTENCY VERIFICATION
+------------------------------------------------------------
+Leader has 200 keys
+✓ Follower :8001 - Consistent (200 keys)
+✓ Follower :8002 - Consistent (200 keys)
+✓ Follower :8003 - Consistent (200 keys)
+✓ Follower :8004 - Consistent (200 keys)
+✓ Follower :8005 - Consistent (200 keys)
+
+------------------------------------------------------------
+✓ ALL REPLICAS ARE CONSISTENT WITH LEADER
+  All 5 followers have matching data
+  Total keys: 200
+
 [... repeats for quorum 2-5 ...]
 
+============================================================
+CONSISTENCY ANALYSIS
+============================================================
+
+Consistency across 5 quorum tests:
+  Quorum 1: ✓ All replicas consistent
+  Quorum 2: ✓ All replicas consistent
+  Quorum 3: ✓ All replicas consistent
+  Quorum 4: ✓ All replicas consistent
+  Quorum 5: ✓ All replicas consistent
+
+Overall: 5/5 tests had full consistency
+
+------------------------------------------------------------
+EXPLANATION OF RESULTS:
+------------------------------------------------------------
+
+Semi-synchronous replication means the leader waits for WRITE_QUORUM
+followers to confirm before returning success to the client. However,
+this does NOT mean all followers have the data immediately.
+
+Expected behavior:
+  - With quorum=1: Leader waits for 1 follower only
+    → Other 4 followers may still be replicating
+    → Possible temporary inconsistency right after writes
+  
+  - With quorum=3: Leader waits for 3 followers
+    → At least 3 followers have confirmed
+    → Remaining 2 may still be catching up
+  
+  - With quorum=5: Leader waits for ALL followers
+    → All followers confirmed before success returned
+    → Should be fully consistent immediately
+
+After waiting 5 seconds for replication to complete, all followers
+should eventually reach consistency due to:
+  1. Async replication continues even after client gets response
+  2. Versioning system prevents out-of-order updates
+  3. All writes eventually propagate to all followers
+
+If inconsistencies persist after the wait period, this may indicate:
+  - Network issues preventing replication
+  - Followers being restarted or down
+  - Higher write rate than replication can handle
+
 ✓ Saved: latency_vs_quorum.png
-  Average trend: y = 0.1412x + 0.1402 (R²=0.989)
-  Median trend: y = 0.1600x + 0.0840 (R²=0.992)
+  Linear trend: y = 0.1444x + 0.1086 (R²=0.989)
 ```
 
 ### Understanding the Results
 
-**Graph Components:**
-- **Blue line**: Average latency with trend line
-- **Orange line**: Median latency with trend line
-- **Dashed lines**: Linear regression fit
-- **R² values**: Goodness of fit (closer to 1.0 = more linear)
+![Latency vs Quorum Analysis](latency_vs_quorum.png)
+
+**Graph Explanation:**
+
+The graph shows the relationship between write quorum size (x-axis) and average write latency in seconds (y-axis). Each blue point represents the measured average latency for 200 concurrent write operations at that quorum level.
 
 **Sample Results:**
 ```
-Quorum | Avg Latency | Median | Explanation
--------|-------------|--------|-------------
-  1    |   0.306s    | 0.269s | Wait for fastest follower
-  2    |   0.411s    | 0.392s | Wait for 2nd fastest
-  3    |   0.538s    | 0.534s | Wait for 3rd fastest
-  4    |   0.693s    | 0.722s | Wait for 4th fastest
-  5    |   0.871s    | 0.904s | Wait for all followers
+Quorum | Avg Latency | Explanation
+-------|-------------|-------------
+  1    |   0.283s    | Wait for fastest follower only
+  2    |   0.359s    | Wait for 2nd fastest follower
+  3    |   0.514s    | Wait for 3rd fastest (majority)
+  4    |   0.713s    | Wait for 4th fastest follower
+  5    |   0.857s    | Wait for all followers (slowest)
 ```
+
+**Analysis of Results:**
+
+The graph demonstrates a **strong linear relationship** between write quorum size and write latency:
+
+1. **Linear Trend**: The measured points show latency increases nearly linearly with quorum size:
+   - **Slope**: ~0.144 seconds per quorum level increase
+   - **Intercept**: ~0.109 seconds base latency
+   - **R² ≈ 0.989**: Indicates excellent linear fit (nearly perfect correlation)
+   - **Formula**: Average Latency ≈ 0.144 × Quorum + 0.109 seconds
+
+2. **Why This Happens**: 
+   - With random network delays [0-1000ms], each follower takes different time to respond
+   - Higher quorum means waiting for slower followers (e.g., quorum=3 waits for 3rd fastest)
+   - This creates order statistics: E[min(X₁...Xₙ)] < E[3rd smallest] < E[max]
+   - Each quorum level adds approximately 144ms on average
+
+3. **Practical Implications**:
+   - **Quorum=1**: Fast writes (~0.28s) but low durability (only 1 replica confirmed)
+   - **Quorum=3**: Balanced (~0.51s) with good durability (majority of replicas)
+   - **Quorum=5**: Slowest (~0.86s) but maximum durability (all replicas confirmed)
+   - **Performance cost**: Each additional quorum level adds ~144ms latency
+
+4. **Trade-off Decision**:
+   - **Development/Testing**: Use quorum=1 for speed
+   - **Production (non-critical)**: Use quorum=2-3 for balance
+   - **Production (critical data)**: Use quorum=4-5 for maximum durability
 
 ### Why Latency Increases Linearly
 
@@ -508,8 +608,9 @@ The random delay range [MIN_DELAY, MAX_DELAY] creates variance. Higher quorum = 
 
 **Linear Trend:**
 With our test configuration (200 writes, random delays 0-1000ms), we observe:
-- **Latency ≈ 0.14 × quorum + 0.14** seconds
-- **R² ≈ 0.99** (nearly perfect linear fit)
+- **Latency ≈ 0.144 × quorum + 0.109** seconds
+- **R² = 0.989** (nearly perfect linear fit)
+- **Interpretation**: Each additional quorum level adds approximately 144ms to write latency
 
 This confirms the theoretical expectation: **latency increases linearly with quorum size**.
 
@@ -588,7 +689,7 @@ async def replicate(req: ReplicateRequest):
 
 Run the consistency checker:
 ```powershell
-python verify_consistency.py
+python auto_analyze.py --verify
 ```
 
 **What it checks:**
@@ -996,7 +1097,9 @@ python test_race_condition.py
 
 **Performance analysis:**
 ```powershell
-python auto_analyze.py
+python auto_analyze.py           # All quorums 1-5
+python auto_analyze.py --simple  # Current quorum only
+python auto_analyze.py --verify  # Check consistency
 ```
 
 **Stop system:**
